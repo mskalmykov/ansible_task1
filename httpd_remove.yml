@@ -2,12 +2,6 @@
   hosts: nodes
   tasks:
 
-#  - name: Stop and disable httpd service
-#    service:
-#      name: httpd
-#      enabled: no
-#      state: stopped
-
   - name: Remove httpd package
     yum:
       name: httpd
