@@ -1,0 +1,17 @@
+---
+
+- name: Edit /etc/default/grub
+  hosts: node1.example.com
+  tasks:
+  - name: Set net.ifnames
+    lineinfile:
+      path: ~ansible/grub
+      regexp: '^(GRUB_CMDLINE_LINUX=.*)net.ifnames=[1-9](.*)$'
+      line: '\1net.ifnames=0\2'
+      backrefs: yes
+  - name: Set biosdevname
+    lineinfile:
+      path: ~ansible/grub
+      regexp: '^(GRUB_CMDLINE_LINUX=.*)biosdevname=[1-9](.*)$'
+      line: '\1biosdevname=0\2'
+      backrefs: yes
