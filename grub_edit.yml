@@ -1,9 +1,9 @@
 ---
 
 - name: Edit /etc/default/grub
-  hosts: node1.example.com
+  hosts: all
   vars:
-    grub_conf: ~ansible/grub
+    grub_conf: /etc/default/grub
   tasks:
 
   - name: Check if file contain GRUB_CMDLINE_LINUX
@@ -20,6 +20,7 @@
       path: "{{ grub_conf }}"
       line: 'GRUB_CMDLINE_LINUX="net.ifnames=0 biosdevname=0"'
     when: not result.found
+    notify: Run grub2-mkconfig
 
   - name: Check if file is already ok
     lineinfile:
@@ -37,3 +38,8 @@
       line: '\1 net.ifnames=0 biosdevname=0"'
       backrefs: yes
     when: not result.found
+    notify: Run grub2-mkconfig
+
+  handlers:
+  - name: Run grub2-mkconfig
+    command: grub2-mkconfig
