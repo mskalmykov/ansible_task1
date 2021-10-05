@@ -2,16 +2,38 @@
 
 - name: Edit /etc/default/grub
   hosts: node1.example.com
+  vars:
+    grub_conf: ~ansible/grub
   tasks:
-  - name: Set net.ifnames
+
+  - name: Check if file contain GRUB_CMDLINE_LINUX
     lineinfile:
-      path: ~ansible/grub
-      regexp: '^(GRUB_CMDLINE_LINUX=.*)net.ifnames=[1-9](.*)$'
-      line: '\1net.ifnames=0\2'
-      backrefs: yes
-  - name: Set biosdevname
+      path: "{{ grub_conf }}"
+      regex: '^GRUB_CMDLINE_LINUX'
+      state: absent
+    check_mode: on
+    register: result
+    changed_when: false
+
+  - name: Add GRUB_CMDLINE_LINUX and our parameters
     lineinfile:
-      path: ~ansible/grub
-      regexp: '^(GRUB_CMDLINE_LINUX=.*)biosdevname=[1-9](.*)$'
-      line: '\1biosdevname=0\2'
+      path: "{{ grub_conf }}"
+      line: 'GRUB_CMDLINE_LINUX="net.ifnames=0 biosdevname=0"'
+    when: not result.found
+
+  - name: Check if file is already ok
+    lineinfile:
+      path: "{{ grub_conf }}"
+      regex: '^GRUB_CMDLINE_LINUX=.*net.ifnames=0 biosdevname=0.*'
+      state: absent
+    check_mode: on
+    register: result
+    changed_when: false
+
+  - name: Set net.ifnames and biosdevname
+    lineinfile:
+      path: "{{ grub_conf }}"
+      regexp: '^(GRUB_CMDLINE_LINUX=.*)"$'
+      line: '\1 net.ifnames=0 biosdevname=0"'
       backrefs: yes
+    when: not result.found
